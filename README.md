@@ -8,7 +8,7 @@ An intelligent HR assistant built using **Retrieval-Augmented Generation (RAG)**
 
 <!-- Replace the link below with your screenshot -->
 
-![App Screenshot](your-image-link-here)
+![App Screenshot](picture.png)
 
 ---
 
