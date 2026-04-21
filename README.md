@@ -8,7 +8,7 @@ An intelligent HR assistant built using **Retrieval-Augmented Generation (RAG)**
 
 <!-- Replace the link below with your screenshot -->
 
-![App Screenshot](picture.png)
+![App Screenshot](https://github.com/JoJoMan42/HR-Policy-Bot/blob/master/picture.png)
 
 ---
 
