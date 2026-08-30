@@ -6,45 +6,41 @@ An intelligent HR assistant built using **Retrieval-Augmented Generation (RAG)**
 
 ## 📸 Demo / Preview
 
-<!-- Replace the link below with your screenshot -->
-
 ![App Screenshot](https://github.com/JoJoMan42/HR-Policy-Bot/blob/master/picture.png)
 
 ---
 
 ## 🚀 Features
 
-* 📄 Answers HR-related questions using company policy documents
-* 🔍 Uses vector search (ChromaDB) for accurate context retrieval
-* 🤖 Generates grounded responses using an LLM
-* 🛠️ Supports tools:
-
+* 📄 **Accurate Policy Q&A**: Answers HR-related questions using official company policy documents.
+* 🔍 **Vector Search (ChromaDB)**: Uses `sentence-transformers` (`all-MiniLM-L6-v2`) and ChromaDB for semantic retrieval.
+* 🤖 **LangGraph + Groq**: Robust agent orchestration powered by `llama-3.1-8b-instant`.
+* 🛠️ **Built-in Tools**:
   * Leave balance calculator
-  * Current date/time queries
-* 📊 Evaluated using RAGAS metrics (answer relevance, context precision)
+  * Working days & date calculations
+* 📊 **Guardrails & Evaluation**: Faithfulness evaluation and response transparency metrics.
 
 ---
 
 ## 🧠 How It Works
 
-1. HR policy PDF is loaded and split into chunks
-2. Text is converted into embeddings
-3. Stored in a vector database (ChromaDB)
-4. User query → converted to embedding
-5. Relevant chunks retrieved
-6. LLM generates answer using retrieved context
-7. Tools are invoked when needed (e.g., leave calculation)
+1. **Document Ingestion**: HR policy PDF is parsed and split into structured chunks.
+2. **Vector Indexing**: Text chunks are embedded and indexed into ChromaDB.
+3. **Smart Routing**: LangGraph router determines whether to retrieve policies, call tools, or answer from memory.
+4. **Context Generation**: LLM generates answers strictly grounded in retrieved policy context.
+5. **Self-Correction**: Faithfulness scoring ensures answers don't hallucinate.
 
 ---
 
 ## 🏗️ Tech Stack
 
-* **Python**
+* **Python 3.10+**
+* **LangChain & LangGraph**
+* **Groq API** (`llama-3.1-8b-instant`)
+* **Sentence Transformers** (`all-MiniLM-L6-v2`)
 * **ChromaDB** (Vector Database)
-* **OpenAI / LLM APIs**
-* **LangChain (optional depending on your code)**
-* **RAGAS** (Evaluation)
-* **Streamlit** (Frontend)
+* **PyMuPDF** (`fitz`)
+* **Streamlit** (Web Interface)
 
 ---
 
@@ -52,12 +48,12 @@ An intelligent HR assistant built using **Retrieval-Augmented Generation (RAG)**
 
 ```
 .
-├── agent.py                  # Core agent logic
-├── app.py                    # Backend / orchestration
-├── capstone_streamlit.py     # Streamlit UI
-├── day13_capstone.ipynb      # Development notebook
-├── requirements.txt          # Dependencies
-├── README.md
+├── agent.py                  # Core LangGraph agent & RAG logic
+├── capstone_streamlit.py     # Streamlit web interface
+├── hr_policy.pdf             # Official HR policy document
+├── requirements.txt          # Production dependencies
+├── picture.png               # App screenshot
+└── README.md                 # Project documentation
 ```
 
 ---
@@ -67,15 +63,20 @@ An intelligent HR assistant built using **Retrieval-Augmented Generation (RAG)**
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/yourusername/hr-policy-rag-agent.git
-cd hr-policy-rag-agent
+git clone https://github.com/JoJoMan42/HR-Policy-Bot.git
+cd HR-Policy-Bot
 ```
 
-### 2. Create virtual environment
+### 2. Create and activate a virtual environment
 
 ```bash
+# Windows
 python -m venv venv
 venv\Scripts\activate
+
+# macOS / Linux
+python3 -m venv venv
+source venv/bin/activate
 ```
 
 ### 3. Install dependencies
@@ -84,17 +85,17 @@ venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-### 4. Add environment variables
+### 4. Configure Environment Variables
 
-Create a `.env` file:
+Create a `.env` file in the project root:
 
-```
-OPENAI_API_KEY=your_api_key_here
+```env
+GROQ_API_KEY=gsk_your_groq_api_key_here
 ```
 
 ---
 
-## ▶️ Run the App
+## ▶️ Run Locally
 
 ```bash
 streamlit run capstone_streamlit.py
@@ -102,34 +103,20 @@ streamlit run capstone_streamlit.py
 
 ---
 
-## 📊 Evaluation
+## ☁️ Deployment (Streamlit Community Cloud)
 
-The system is evaluated using **RAGAS metrics**:
-
-* Answer Relevance
-* Context Precision
-* Faithfulness
-
----
-
-## ⚠️ Limitations
-
-* Performance depends on quality of HR documents
-* Requires API key for LLM usage
-* Retrieval may fail if query is too vague
-
----
-
-## 💡 Future Improvements
-
-* Better retrieval (reranking, hybrid search)
-* Multi-document support
-* Conversation memory enhancement
-* Deployment (cloud / Docker)
+1. Fork or push this repository to GitHub.
+2. Log in to [Streamlit Community Cloud](https://share.streamlit.io/).
+3. Create a new app, set repository to `JoJoMan42/HR-Policy-Bot`, and main file to `capstone_streamlit.py`.
+4. In **Advanced Settings > Secrets**, add:
+   ```toml
+   GROQ_API_KEY = "gsk_your_groq_api_key_here"
+   ```
+5. Click **Deploy**!
 
 ---
 
 ## 👨‍💻 Author
 
-**Parthiv Datta**
+**Parthiv Datta**  
 3rd Year B.Tech CSE
