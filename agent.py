@@ -23,7 +23,7 @@ if not GROQ_API_KEY:
         GROQ_API_KEY = st.secrets.get("GROQ_API_KEY")
     except Exception:
         pass
-MODEL_NAME             = os.environ.get("GROQ_MODEL_NAME", "llama-3.3-70b-versatile")
+MODEL_NAME             = os.environ.get("GROQ_MODEL_NAME", "openai/gpt-oss-120b")
 EMBED_MODEL            = "all-MiniLM-L6-v2"
 TOP_K                  = 3
 FAITHFULNESS_THRESHOLD = 0.7
