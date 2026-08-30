@@ -17,6 +17,12 @@ load_dotenv()
 # CONFIG
 # ──────────────────────────────────────────────
 GROQ_API_KEY           = os.environ.get("GROQ_API_KEY")
+if not GROQ_API_KEY:
+    try:
+        import streamlit as st
+        GROQ_API_KEY = st.secrets.get("GROQ_API_KEY")
+    except Exception:
+        pass
 MODEL_NAME             = "llama-3.1-8b-instant"
 EMBED_MODEL            = "all-MiniLM-L6-v2"
 TOP_K                  = 3
@@ -26,17 +32,18 @@ SLIDING_WINDOW         = 6
 PDF_PATH               = "hr_policy.pdf"
 
 class CapstoneState(TypedDict):
-    question      : str
-    messages      : List[dict]
-    route         : str
-    retrieved     : str
-    sources       : List[str]
-    tool_result   : str
-    answer        : str
-    faithfulness  : float
-    eval_retries  : int
-    user_name     : Optional[str]
-    employee_id   : Optional[str]
+    question      : str            # Set by agent.ask() (Initial user input)
+    messages      : List[dict]     # Updated by memory_node (appends user query) & save_node (appends assistant answer)
+    route         : str            # Updated by router_node ("retrieve", "tool", or "memory_only")
+    retrieved     : str            # Updated by retrieval_node (PDF context) & skip_retrieval_node (empty string)
+    sources       : List[str]      # Updated by retrieval_node (topic titles list) & skip_retrieval_node (empty list)
+    tool_result   : str            # Updated by tool_node (calculation or date/time output)
+    answer        : str            # Updated by answer_node (LLM generated response)
+    faithfulness  : float          # Updated by eval_node (faithfulness evaluation score 0.0-1.0)
+    eval_retries  : int            # Updated by memory_node (resets to 0) & eval_node (increments on low score)
+    user_name     : Optional[str]  # Updated by memory_node (extracted via regex if provided)
+    employee_id   : Optional[str]  # Updated by memory_node (extracted via regex if provided)
+
 
 # ──────────────────────────────────────────────
 # PART 1 — LOADERS
@@ -49,8 +56,19 @@ def load_embedder() -> SentenceTransformer:
 
 def load_llm() -> ChatGroq:
     print("[INIT] Connecting to Groq LLM...")
+    api_key = GROQ_API_KEY or os.environ.get("GROQ_API_KEY")
+    if not api_key:
+        try:
+            import streamlit as st
+            api_key = st.secrets.get("GROQ_API_KEY")
+        except Exception:
+            pass
+
+    if not api_key:
+        raise ValueError("GROQ_API_KEY not found in environment variables or Streamlit secrets.")
+
     llm = ChatGroq(
-        api_key    = GROQ_API_KEY,
+        api_key    = api_key,
         model_name = MODEL_NAME,
         temperature= 0.1
     )
@@ -460,9 +478,11 @@ Reply with ONLY a decimal number between 0.0 and 1.0. Nothing else."""
     def ask(self, question: str, thread_id: str = "default") -> dict:
         config = {"configurable": {"thread_id": thread_id}}
 
-        initial_state: CapstoneState = {
+        # We only pass values that need to be explicitly set/reset for the new turn.
+        # DO NOT pass `messages`, `user_name`, or `employee_id` here, otherwise
+        # they will overwrite the persistent state in the MemorySaver checkpointer.
+        initial_state = {
             "question"    : question,
-            "messages"    : [],
             "route"       : "",
             "retrieved"   : "",
             "sources"     : [],
@@ -470,8 +490,6 @@ Reply with ONLY a decimal number between 0.0 and 1.0. Nothing else."""
             "answer"      : "",
             "faithfulness": 0.0,
             "eval_retries": 0,
-            "user_name"   : None,
-            "employee_id" : None,
         }
 
         return self.app.invoke(initial_state, config=config)
