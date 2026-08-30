@@ -273,10 +273,11 @@ Reply with exactly ONE word — either: retrieve, tool, or memory_only"""
         question = state["question"].lower()
         try:
             if any(word in question for word in ["date", "time", "today", "day"]):
-                now    = datetime.datetime.now()
+                ist = datetime.timezone(datetime.timedelta(hours=5, minutes=30))
+                now    = datetime.datetime.now(tz=ist)
                 result = (
                     f"Current date: {now.strftime('%A, %d %B %Y')}\n"
-                    f"Current time: {now.strftime('%I:%M %p')}"
+                    f"Current time: {now.strftime('%I:%M %p')} IST"
                 )
                 print("[tool_node] datetime tool used")
 
