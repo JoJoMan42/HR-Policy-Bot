@@ -128,39 +128,47 @@ if prompt := st.chat_input("Ask an HR question..."):
         st.markdown(prompt)
 
     with st.chat_message("assistant"):
-        with st.spinner("Looking up HR policy..."):
-            result = agent.ask(prompt, thread_id=st.session_state.thread_id)
+        try:
+            with st.spinner("Looking up HR policy..."):
+                result = agent.ask(prompt, thread_id=st.session_state.thread_id)
 
-        answer       = result.get("answer", "Sorry, I could not generate a response.")
-        route        = result.get("route", "N/A")
-        faithfulness = result.get("faithfulness", 0.0)
-        sources      = result.get("sources", [])
-        user_name    = result.get("user_name", None)
+            answer       = result.get("answer", "Sorry, I could not generate a response.")
+            route        = result.get("route", "N/A")
+            faithfulness = result.get("faithfulness", 0.0)
+            sources      = result.get("sources", [])
+            user_name    = result.get("user_name", None)
 
-        if user_name:
-            st.session_state.user_name = user_name
+            if user_name:
+                st.session_state.user_name = user_name
 
-        st.markdown(answer)
+            st.markdown(answer)
 
-        with st.expander("📊 Response Details", expanded=False):
-            col1, col2, col3 = st.columns(3)
-            col1.metric("Route",        route)
-            col2.metric("Faithfulness", f"{faithfulness:.2f}")
-            col3.metric("Sources",      len(sources))
-            if sources:
-                st.markdown("**Retrieved from:**")
-                for src in sources:
-                    st.markdown(f"- 📄 {src}")
+            with st.expander("📊 Response Details", expanded=False):
+                col1, col2, col3 = st.columns(3)
+                col1.metric("Route",        route)
+                col2.metric("Faithfulness", f"{faithfulness:.2f}")
+                col3.metric("Sources",      len(sources))
+                if sources:
+                    st.markdown("**Retrieved from:**")
+                    for src in sources:
+                        st.markdown(f"- 📄 {src}")
 
-    st.session_state.messages.append({
-        "role"   : "assistant",
-        "content": answer,
-        "meta"   : {
-            "route"       : route,
-            "faithfulness": faithfulness,
-            "sources"     : sources
-        }
-    })
+            st.session_state.messages.append({
+                "role"   : "assistant",
+                "content": answer,
+                "meta"   : {
+                    "route"       : route,
+                    "faithfulness": faithfulness,
+                    "sources"     : sources
+                }
+            })
+        except Exception as e:
+            err_msg = str(e)
+            st.error(f"⚠️ **Error connecting to Groq / Agent:**\n\n`{err_msg}`")
+            if "401" in err_msg or "AuthenticationError" in err_msg or "api_key" in err_msg.lower():
+                st.info("💡 **Tip:** Please check that your `GROQ_API_KEY` in Streamlit App Settings -> Secrets is valid and active on [console.groq.com](https://console.groq.com/keys).")
+            elif "429" in err_msg or "RateLimitError" in err_msg:
+                st.warning("⏳ **Rate limit reached:** Groq free tier limit reached. Please wait a minute and try again.")
 
 # Empty state
 if not st.session_state.messages:
