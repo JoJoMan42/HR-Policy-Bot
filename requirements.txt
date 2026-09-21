@@ -1,4 +1,8 @@
-streamlit
+fastapi
+uvicorn[standard]
+pydantic
+sqlalchemy>=2.0.0
+psycopg2-binary>=2.9.0
 langchain-groq
 langchain-core
 langgraph
@@ -6,3 +10,5 @@ sentence-transformers
 chromadb
 pymupdf
 python-dotenv
+PyJWT>=2.8.0
+bcrypt>=4.0.0
