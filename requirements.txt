@@ -7,7 +7,7 @@ langchain-groq
 langchain-core
 langgraph
 sentence-transformers
-chromadb
+pgvector>=0.3.0
 pymupdf
 python-dotenv
 PyJWT>=2.8.0

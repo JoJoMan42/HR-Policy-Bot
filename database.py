@@ -1,9 +1,10 @@
-"""PostgreSQL persistence for chat conversations and messages."""
+"""PostgreSQL persistence for chat conversations, messages, and vector embeddings."""
 
 import os
 from typing import Any
 
 from dotenv import load_dotenv
+from pgvector.sqlalchemy import Vector
 from sqlalchemy import DateTime, Float, ForeignKey, Integer, String, Text, create_engine, func, text
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.dialects.postgresql import JSONB
@@ -61,6 +62,17 @@ class Message(Base):
     conversation: Mapped[Conversation] = relationship(back_populates="messages")
 
 
+class PolicyChunk(Base):
+    """Stores PDF document chunks with their vector embeddings (pgvector)."""
+    __tablename__ = "policy_chunks"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    chunk_id: Mapped[str] = mapped_column(String(32), unique=True, index=True)
+    topic: Mapped[str] = mapped_column(String(255))
+    content: Mapped[str] = mapped_column(Text)
+    embedding = mapped_column(Vector(384))  # 384 dimensions for all-MiniLM-L6-v2
+
+
 def _session_factory():
     if not DATABASE_URL:
         raise RuntimeError("DATABASE_URL is required. Configure a PostgreSQL connection in .env.")
@@ -72,7 +84,9 @@ SessionLocal, engine = _session_factory()
 
 
 def init_db() -> None:
-    """Create the small persistence schema on first startup."""
+    """Create the persistence schema and pgvector extension on first startup."""
+    with engine.begin() as connection:
+        connection.execute(text("CREATE EXTENSION IF NOT EXISTS vector"))
     Base.metadata.create_all(bind=engine)
     # create_all does not add columns to a table created before authentication existed.
     with engine.begin() as connection:
@@ -83,7 +97,12 @@ def init_db() -> None:
         connection.execute(text(
             "CREATE INDEX IF NOT EXISTS ix_conversations_user_id ON conversations (user_id)"
         ))
-    print("[DB] PostgreSQL tables verified.")
+        # HNSW cosine index for fast vector similarity search.
+        connection.execute(text(
+            "CREATE INDEX IF NOT EXISTS ix_policy_chunks_embedding "
+            "ON policy_chunks USING hnsw (embedding vector_cosine_ops)"
+        ))
+    print("[DB] PostgreSQL tables & pgvector extension verified.")
 
 
 def get_user_by_email(email: str) -> User | None:
@@ -180,5 +199,20 @@ def get_conversation_history(thread_id: str, user_id: int, limit: int = 50) -> l
                 "sources": row.sources or [],
                 "created_at": row.created_at,
             }
+            for row in rows
+        ]
+
+
+def search_similar_chunks(query_embedding: list[float], top_k: int = 3) -> list[dict]:
+    """Return the top-k most similar policy chunks using pgvector cosine distance."""
+    with SessionLocal() as db:
+        rows = (
+            db.query(PolicyChunk)
+            .order_by(PolicyChunk.embedding.cosine_distance(query_embedding))
+            .limit(top_k)
+            .all()
+        )
+        return [
+            {"topic": row.topic, "text": row.content}
             for row in rows
         ]

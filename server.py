@@ -13,10 +13,7 @@ from pydantic import BaseModel
 from agent import (
     load_embedder,
     load_llm,
-    load_documents_from_pdf,
-    build_chromadb,
     HRAgent,
-    PDF_PATH,
 )
 from database import (
     User,
@@ -45,11 +42,9 @@ async def lifespan(app: FastAPI):
     print("[SERVER] Initialising PostgreSQL...")
     init_db()
     print("[SERVER] Initialising HR Agent...")
-    embedder   = load_embedder()
-    llm        = load_llm()
-    documents  = load_documents_from_pdf(PDF_PATH)
-    collection = build_chromadb(documents, embedder)
-    agent_state["agent"] = HRAgent(llm, embedder, collection)
+    embedder = load_embedder()
+    llm      = load_llm()
+    agent_state["agent"] = HRAgent(llm, embedder)
     print("[SERVER] HR Agent ready. Listening for requests.")
     yield
     agent_state.clear()
