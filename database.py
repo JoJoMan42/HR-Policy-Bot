@@ -202,7 +202,6 @@ def get_conversation_history(thread_id: str, user_id: int, limit: int = 50) -> l
             for row in rows
         ]
 
-
 def search_similar_chunks(query_embedding: list[float], top_k: int = 3) -> list[dict]:
     """Return the top-k most similar policy chunks using pgvector cosine distance."""
     with SessionLocal() as db:

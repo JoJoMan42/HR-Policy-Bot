@@ -9,16 +9,16 @@ const USER_KEY = 'hrbot_user'
 
 const initialMessages = [{
   id: 'welcome-1', role: 'bot',
-  text: 'Hi there! I am KampusBot, your AI campus companion. Ask me anything about attendance criteria, course syllabus, exam schedules, grading rules, or campus facilities.',
-  time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }), sources: ['Campus Knowledge Base'],
+  text: 'Hi there! I am the Tyrell Corp HRBot, your AI HR companion. Ask me anything about leave policies, payroll, benefits, code of conduct, or general HR queries.',
+  time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }), sources: ['Tyrell Corp HR Knowledge Base'],
 }]
 
 const quickQuestions = [
-  { title: 'Attendance Rule', question: 'What is the minimum attendance requirement?' },
-  { title: 'CSE Syllabus', question: 'Tell me about the Computer Science & Engineering course structure.' },
-  { title: 'SGPA Calculator', question: 'Calculate my SGPA if my grade points are 8.5, 9, 8, 7.5, 9' },
-  { title: 'Exam Schedule', question: 'When do the end-semester exams start?' },
-  { title: 'Library Policy', question: 'How many books can students borrow from the library?' },
+  { title: 'Leave Policy', question: 'What is the annual leave policy?' },
+  { title: 'Benefits', question: 'Tell me about the health insurance benefits.' },
+  { title: 'Payroll', question: 'When is the salary disbursed every month?' },
+  { title: 'Remote Work', question: 'What is the work from home policy?' },
+  { title: 'Expense Claim', question: 'How do I submit an expense reimbursement claim?' },
 ]
 
 function readStoredUser() {
@@ -88,7 +88,7 @@ function ChatApp({ user, onLogout }) {
       const data = await response.json()
       setIsBackendOnline(true)
       setMessages((previous) => [...previous, {
-        id: `bot_${crypto.randomUUID()}`, role: 'bot', text: data.answer || "I couldn't find an answer in the campus documents.",
+        id: `bot_${crypto.randomUUID()}`, role: 'bot', text: data.answer || "I couldn't find an answer in the HR documents.",
         time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }), sources: data.sources || [],
       }])
     } catch {
@@ -103,7 +103,7 @@ function ChatApp({ user, onLogout }) {
   return (
     <div className="app-shell">
       <header className="topbar">
-        <div className="brand"><div className="brand-mark" aria-hidden="true">K</div><div className="brand-text"><strong>KampusBot</strong><span>Campus Query Assistant</span></div></div>
+        <div className="brand"><div className="brand-mark" aria-hidden="true">T</div><div className="brand-text"><strong>Tyrell Corp HR</strong><span>HR Query Assistant</span></div></div>
         <div className="topbar-right"><div className={`status-badge ${isBackendOnline ? 'status-online' : 'status-offline'}`}><span className="status-dot"></span>{isBackendOnline ? 'Connected' : 'Offline'}</div><button className="logout-button" onClick={onLogout}>Sign out</button></div>
       </header>
       <main className="chat-container">
@@ -115,8 +115,8 @@ function ChatApp({ user, onLogout }) {
         <div className="composer-wrapper">
           <div className="quick-chips-bar" aria-label="Suggested questions">{quickQuestions.map((item) => <button key={item.title} type="button" className="chip-btn" onClick={() => sendMessage(item.question)} disabled={isLoading}>{item.title}</button>)}</div>
           <form className="composer" onSubmit={(event) => { event.preventDefault(); sendMessage(draft) }}>
-            <label className="sr-only" htmlFor="message-input">Ask KampusBot</label>
-            <input id="message-input" value={draft} onChange={(event) => setDraft(event.target.value)} placeholder="Ask a campus question..." autoComplete="off" disabled={isLoading} />
+            <label className="sr-only" htmlFor="message-input">Ask Tyrell Corp HRBot</label>
+            <input id="message-input" value={draft} onChange={(event) => setDraft(event.target.value)} placeholder="Ask an HR question..." autoComplete="off" disabled={isLoading} />
             <button type="submit" disabled={!draft.trim() || isLoading}>{isLoading ? '...' : 'Ask'}</button>
           </form>
         </div>

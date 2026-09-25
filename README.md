@@ -1,4 +1,4 @@
-# 🧠 HR Policy RAG Assistant
+# 🧠 Tyrell Corp HR Policy RAG Assistant
 
 > An enterprise-grade **Retrieval-Augmented Generation** system that answers employee HR policy queries with strict document grounding, self-correcting guardrails, and full-stack persistence.
 

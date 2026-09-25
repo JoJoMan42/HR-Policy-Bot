@@ -31,8 +31,8 @@ function AuthScreen({ onAuthenticated }) {
   return (
     <main className="auth-page">
       <section className="auth-card" aria-labelledby="auth-title">
-        <div className="auth-mark" aria-hidden="true">K</div>
-        <p className="auth-eyebrow">KampusBot</p>
+        <div className="auth-mark" aria-hidden="true">T</div>
+        <p className="auth-eyebrow">Tyrell Corp HR</p>
         <h1 id="auth-title">{isSignup ? 'Create your account' : 'Welcome back'}</h1>
         <p className="auth-subtitle">{isSignup ? 'Save your own private chat history.' : 'Sign in to continue to your assistant.'}</p>
         <form className="auth-form" onSubmit={handleSubmit}>
