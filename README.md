@@ -327,8 +327,3 @@ This executes:
 | **RAGAS Benchmark** | 5 | Faithfulness scoring against ground-truth answers |
 
 ---
-
-## 👨‍💻 Author
-
-**Parthiv Datta**
-*3rd Year B.Tech CSE*
